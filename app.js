@@ -6,6 +6,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
+
 //These modules/files contain code for handling particular sets of related "routes" (URL paths)
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -14,6 +15,20 @@ const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 // note: At this point, we have just imported the module; we haven't actually used its routes yet 
 //(this happens just a little bit further down the file)
+
+const mongoose = require('mongoose');
+
+const url = 'mongodb://localhost:27017/nucampsite';
+const connect = mongoose.connect(url, {
+    useCreateIndex: true,
+    useFindAndModify: false,
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+
+connect.then(() => console.log('Connected correctly to server'),
+    err => console.log(err)
+);
 
 /*Creates express application object. */
 const app = express();
