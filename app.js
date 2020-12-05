@@ -46,6 +46,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('12345-67890-09876-54321'));
 
+//this is where we'll add authentication
+
 app.use(session({
     name: 'session-id',
     secret: '12345-67890-09876-54321',
@@ -54,38 +56,30 @@ app.use(session({
     store: new FileStore()
 }));
 
+//user can access the index and user router without being logged in
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
 // Start of Basic Authentication
 
 function auth(req, res, next) {
     console.log(req.session);
     //Every client contains a header: What is a HTTP header??
     //They define the operating parameters of HTTP transaction
+    //check for a valid session
     if (!req.session.user) {
-        const authHeader = req.headers.authorization;
 
-        //Checking to see if your application is sending a header to the client
-        if (!authHeader) {
-            const err = new Error('You are not authenticated!');
-            res.setHeader('WWW-Authenticate', 'Basic');
-            err.status = 401;
-            return next(err);
-        }
+        const err = new Error('You are not authenticated!');
+
+        err.status = 401;
+        return next(err);
+
         //What is this Buffer object?
         //A container to hold binary data and will be encoded and decocoded in base64
-        const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-        const user = auth[0];
-        const pass = auth[1];
-        if (user === 'admin' && pass === 'password') {
-            req.session.user = 'admin';
-            return next(); // authorized
-        } else {
-            const err = new Error('You are not authenticated!');
-            res.setHeader('WWW-Authenticate', 'Basic');
-            err.status = 401;
-            return next(err);
-        }
+
     } else {
-        if (req.session.user === 'admin') {
+        //value set in user router when a user logged in === 'authenticaed'
+        if (req.session.user === 'authenticated') {
             return next();
         } else {
             const err = new Error('You are not authenticated!');
@@ -95,7 +89,7 @@ function auth(req, res, next) {
     }
 }
 
-
+//using auth function
 app.use(auth)
     //End of Basic Authentication
 app.use(express.static(path.join(__dirname, 'public')));
@@ -106,8 +100,7 @@ handling chain. The imported code will define particular
 routes for the different parts of the site:
 Note: The paths specified above ('/' and '/users') 
 are treated as a prefix to routes defined in the imported files.*/
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
 app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
