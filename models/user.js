@@ -9,7 +9,14 @@ const Schema = mongoose.Schema; // Use Schema object refer to documentation, to 
 //const passportLocalMongoose = require('passport-local')
 //making a schema
 const userSchema = new Schema({
-
+    firstname: {
+        type: String,
+        default: ''
+    },
+    lastname: {
+        type: String,
+        default: ''
+    },
     admin: {
         type: Boolean,
         default: false
