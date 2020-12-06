@@ -3,13 +3,9 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
 const passport = require('passport');
-const authenticate = require('./authenticate');
-
+const config = require('./config');
 
 //These modules/files contain code for handling particular sets of related "routes" (URL paths)
 const indexRouter = require('./routes/index');
@@ -22,7 +18,7 @@ const partnerRouter = require('./routes/partnerRouter');
 
 const mongoose = require('mongoose');
 
-const url = 'mongodb://localhost:27017/nucampsite';
+const url = config.mongoUrl;
 const connect = mongoose.connect(url, {
     useCreateIndex: true,
     useFindAndModify: false,
@@ -46,44 +42,13 @@ to add the middleware libraries into the request handling chain*/
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-//app.use(cookieParser('12345-67890-09876-54321'));
-
-//this is where we'll add authentication
-
-app.use(session({
-    name: 'session-id',
-    secret: '12345-67890-09876-54321',
-    saveUninitialized: false,
-    resave: false,
-    store: new FileStore()
-}));
 
 app.use(passport.initialize());
-app.use(passport.session());
 
 //user can access the index and user router without being logged in
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-// Start of Basic Authentication
-
-function auth(req, res, next) {
-    console.log(req.session);
-    //Every client contains a header: What is a HTTP header??
-    //They define the operating parameters of HTTP transaction
-    //check for a valid session
-    if (!req.user) {
-        const err = new Error('You are not authenticated!');
-        err.status = 401;
-        return next(err);
-    } else {
-        return next();
-    }
-}
-
-//using auth function
-app.use(auth)
-    //End of Basic Authentication
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* Now that all the other middleware is set up, we add our 
