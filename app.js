@@ -7,6 +7,8 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
+const passport = require('passport');
+const authenticate = require('./authenticate');
 
 
 //These modules/files contain code for handling particular sets of related "routes" (URL paths)
@@ -56,6 +58,9 @@ app.use(session({
     store: new FileStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 //user can access the index and user router without being logged in
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -67,25 +72,12 @@ function auth(req, res, next) {
     //Every client contains a header: What is a HTTP header??
     //They define the operating parameters of HTTP transaction
     //check for a valid session
-    if (!req.session.user) {
-
+    if (!req.user) {
         const err = new Error('You are not authenticated!');
-
         err.status = 401;
         return next(err);
-
-        //What is this Buffer object?
-        //A container to hold binary data and will be encoded and decocoded in base64
-
     } else {
-        //value set in user router when a user logged in === 'authenticaed'
-        if (req.session.user === 'authenticated') {
-            return next();
-        } else {
-            const err = new Error('You are not authenticated!');
-            err.status = 401;
-            return next(err);
-        }
+        return next();
     }
 }
 
