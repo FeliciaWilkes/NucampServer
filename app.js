@@ -6,6 +6,7 @@ const path = require('path');
 const logger = require('morgan');
 const passport = require('passport');
 const config = require('./config');
+const uploadRouter = require('./routes/uploadRouter');
 
 //These modules/files contain code for handling particular sets of related "routes" (URL paths)
 const indexRouter = require('./routes/index');
@@ -71,6 +72,7 @@ are treated as a prefix to routes defined in the imported files.*/
 app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
+app.use('/imageUpload', uploadRouter);
 
 /*add handler methods for errors and HTTP 404 responses
  catch 404 and forward to error handler*/
