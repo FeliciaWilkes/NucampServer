@@ -4,12 +4,13 @@ const User = require('../models/user');
 //import passport
 const passport = require('passport');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const router = express.Router();
 
 /* GET users listing. */
 ///router.get : the GET method of users endpoint: verify the user , verify user is admin
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     //find and return all users in DB
     User.find()
         .then(users => {
@@ -20,7 +21,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
         .catch(err => next(err));
 });
 //endpoint
-router.post('/signup', (req, res) => {
+router.post('/signup', cors.corsWithOptions, (req, res) => {
     User.register(
         new User({ username: req.body.username }),
         req.body.password,
@@ -56,7 +57,7 @@ router.post('/signup', (req, res) => {
 });
 
 //endpoint
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
     const token = authenticate.getToken({ _id: req.user._id });
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
@@ -66,7 +67,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 
 
 //Objective: Remove session when user logs out
-router.get('/logout', (req, res, next) => {
+router.get('/logout', cors.corsWithOptions, (req, res, next) => {
     if (req.session) {
         req.session.destroy();
         res.clearCookie('session-id');
